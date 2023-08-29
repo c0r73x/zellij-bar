@@ -5,7 +5,7 @@ use zellij_tile_utils::style;
 
 use crate::{
     color,
-    view::{Block, View},
+    view::{Block, Separator, View},
 };
 
 pub struct Tabs;
@@ -14,12 +14,29 @@ impl Tabs {
     pub fn render(tabs: &[TabInfo], mode: InputMode, palette: Palette) -> View {
         let mut blocks: Vec<Block> = Vec::with_capacity(tabs.len());
         let mut total_len = 0;
+        let mut last_bg = palette.bg;
 
         for tab in tabs {
-            let block = Tab::render(tab, mode, palette);
+            let (bg, block) = Tab::render(tab, mode, palette);
+            // separator
+            {
+                let separator = Separator::render("", &last_bg, &bg);
+                last_bg = bg;
+
+                total_len += separator.len;
+                blocks.push(separator);
+            }
 
             total_len += block.len;
             blocks.push(block);
+        }
+
+        // separator
+        {
+            let separator = Separator::render("", &last_bg, &palette.bg);
+
+            total_len += separator.len;
+            blocks.push(separator);
         }
 
         View {
@@ -32,7 +49,7 @@ impl Tabs {
 pub struct Tab;
 
 impl Tab {
-    pub fn render(tab: &TabInfo, mode: InputMode, palette: Palette) -> Block {
+    pub fn render(tab: &TabInfo, mode: InputMode, palette: Palette) -> (PaletteColor, Block) {
         let mut text = tab.name.clone();
 
         if tab.active && mode == InputMode::RenameTab && text.is_empty() {
@@ -64,10 +81,10 @@ impl Tab {
 
         let body = style!(fg, bg).bold().paint(text);
 
-        Block {
+        (bg, Block {
             body: body.to_string(),
             len,
             tab_index: Some(tab.position),
-        }
+        })
     }
 }

@@ -9,6 +9,8 @@ use std::cmp::{max, min};
 use view::Error;
 use zellij_tile::prelude::*;
 
+use std::collections::{BTreeMap};
+
 use crate::{
     datetime::DateTime,
     session::Session,
@@ -24,26 +26,36 @@ struct State {
     mouse_click_pos: usize,
     should_change_tab: bool,
     now: DateTime,
+    userspace_configuration: BTreeMap<String, String>,
 }
 
 register_plugin!(State);
 
 impl ZellijPlugin for State {
-    fn load(&mut self) {
-        set_selectable(false);
-        set_timeout(1.0);
+    fn load(&mut self, configuration: BTreeMap<String, String>) {
+        self.userspace_configuration = configuration;
+        request_permission(&[
+            PermissionType::ReadApplicationState,
+        ]);
         subscribe(&[
             EventType::TabUpdate,
             EventType::ModeUpdate,
             EventType::Mouse,
             EventType::Timer,
+            EventType::PermissionRequestResult,
         ]);
+        set_selectable(true);
+        set_timeout(1.0);
     }
 
     fn update(&mut self, event: Event) -> bool {
         let mut should_render = false;
 
         match event {
+            Event::PermissionRequestResult(_) => {
+                set_selectable(false);
+                should_render = true;
+            },
             Event::ModeUpdate(mode_info) => {
                 should_render = self.mode_info != mode_info;
                 self.mode_info = mode_info;

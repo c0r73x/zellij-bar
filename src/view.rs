@@ -33,10 +33,7 @@ impl Bg {
 pub struct Separator;
 
 impl Separator {
-    const CHAR: &str = "";
-
-    pub fn render(fg: &PaletteColor, bg: &PaletteColor) -> Block {
-        let text = Self::CHAR;
+    pub fn render(text: &str, fg: &PaletteColor, bg: &PaletteColor) -> Block {
         let len = text.width();
         let body = style!(*fg, *bg).paint(text);
 

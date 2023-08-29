@@ -5,7 +5,7 @@ use zellij_tile_utils::style;
 
 use crate::{
     color::{self, ModeColor},
-    view::{Block, View},
+    view::{Block, View, Separator},
 };
 
 pub struct Session;
@@ -15,10 +15,10 @@ impl Session {
         let mut blocks = vec![];
         let mut total_len = 0;
 
+        let ModeColor { fg, bg } = ModeColor::new(mode, palette);
+
         // name
         if let Some(name) = name {
-            let ModeColor { fg, bg } = ModeColor::new(mode, palette);
-
             let text = format!(" {} ", name.to_uppercase());
             let len = text.width();
             let body = style!(fg, bg).bold().paint(text);
@@ -29,6 +29,14 @@ impl Session {
                 len,
                 tab_index: None,
             })
+        }
+
+        // separator
+        {
+            let separator = Separator::render("", &bg, &color::LIGHTER_GRAY);
+
+            total_len += separator.len;
+            blocks.push(separator);
         }
 
         // mode
@@ -52,6 +60,14 @@ impl Session {
                 len,
                 tab_index: None,
             })
+        }
+
+        // separator
+        {
+            let separator = Separator::render("", &color::LIGHTER_GRAY, &palette.bg);
+
+            total_len += separator.len;
+            blocks.push(separator);
         }
 
         View {

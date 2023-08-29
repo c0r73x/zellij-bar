@@ -25,7 +25,7 @@ impl DateTime {
         let offset = FixedOffset::east_opt(2 * 3600 /* hours */).unwrap();
         let now = utc.with_timezone(&offset);
 
-        let datetime = now.format("%d/%m/%Y %H:%M").to_string();
+        let datetime = now.format("%Y-%m-%d %H:%M").to_string();
 
         let (date, time) = match datetime.split_once(' ') {
             Some(dt) => dt,
@@ -58,7 +58,7 @@ impl DateTime {
 
         // separator
         {
-            let separator = Separator::render(&color::LIGHTER_GRAY, &palette.bg);
+            let separator = Separator::render("", &color::LIGHTER_GRAY, &palette.bg);
 
             total_len += separator.len;
             blocks.push(separator);
@@ -80,7 +80,7 @@ impl DateTime {
 
         // separator
         {
-            let separator = Separator::render(&mode_bg, &color::LIGHTER_GRAY);
+            let separator = Separator::render("", &mode_bg, &color::LIGHTER_GRAY);
 
             total_len += separator.len;
             blocks.push(separator);
